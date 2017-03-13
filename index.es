@@ -39,7 +39,6 @@ export const reactClass = connect(
 
   componentWillReceiveProps(nextProps) {
     let oldnewestshipid = this.state.newestshipid;
-    console.log(oldnewestshipid, nextProps);
     if (oldnewestshipid == 0) {
       let newestshipid = this.get_newest_shipid(nextProps);
       this.setState({newestshipid: newestshipid});
@@ -163,8 +162,7 @@ export const reactClass = connect(
     let notify_list = this.state.notify_list;
     if (notify_list[value] == undefined) {
       notify_list[value] = 1;
-      this.savelist();
-      this.setState({notify_list: notify_list})
+      this.setState({notify_list: notify_list},()=>this.savelist())
     }
   }
 
@@ -172,8 +170,7 @@ export const reactClass = connect(
     let notify_list = this.state.notify_list;
     if (notify_list[shipid]) {
       delete(notify_list[shipid]);
-      this.savelist();
-      this.setState({notify_list: notify_list})
+      this.setState({notify_list: notify_list},()=>this.savelist())
     }
   }
 
@@ -336,8 +333,7 @@ export const reactClass = connect(
     } else {
       nl.newShip = true
     }
-    this.savelist();
-    this.setState({notify_list: nl})
+    this.setState({notify_list: nl},()=>this.savelist())
   };
 
   render() {
