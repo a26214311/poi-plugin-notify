@@ -5,7 +5,7 @@ import {createSelector} from 'reselect'
 import {store} from 'views/create-store'
 
 import {join} from 'path'
-import {FormGroup, FormControl, ListGroup, ListGroupItem, Button, Row, Col} from 'react-bootstrap'
+import {FormGroup, FormControl, ListGroup, ListGroupItem, Button, Row, Col,OverlayTrigger,Tooltip} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
 
 
@@ -71,11 +71,13 @@ export const reactClass = connect(
       if(locked==0){
         if(!notifyed[shipid]){
           if (notifylist.newShip) {
-            if (this.if_new_ship(shipid,newshipid)) {
-              willnotify=true;
+            if(notifylist[newshipid]!=2){
+              if (this.if_new_ship(shipid,newshipid)) {
+                willnotify=true;
+              }
             }
           }
-          if (notifylist[newshipid]) {
+          if (notifylist[newshipid]==1) {
             willnotify=true;
           }
         }
@@ -301,6 +303,16 @@ export const reactClass = connect(
     this.setState({notify_list: nl},()=>this.savelist())
   };
 
+  changeNotify(notifyKey){
+    let nl = this.state.notify_list;
+    if(nl[notifyKey]==1){
+      nl[notifyKey]=2;
+    }else{
+      nl[notifyKey]=1;
+    }
+    this.setState({notify_list: nl},()=>this.savelist());
+  }
+
   render() {
     try {
       return this.render_D();
@@ -360,7 +372,7 @@ export const reactClass = connect(
           <Col xs={12}>
             <form className="input-select">
               <FormGroup>
-                <FormControl type="text" placeholder="选择或输入要提醒的舰船" ref="shipInput" value={this.state.input_shipList}
+                <FormControl type="text" placeholder="输入要提醒的舰船" ref="shipInput" value={this.state.input_shipList}
                              onChange={this.changeHandler} onFocus={this.showShipList}
                              onBlur={this.hiddenShipList}/>
               </FormGroup>
@@ -379,15 +391,23 @@ export const reactClass = connect(
             </Button>
           </Col>
         </Row>
+        <OverlayTrigger placement={'bottom'} overlay={
+          <Tooltip>
+            <div style={{'background-color':'blue'}}>提醒</div>
+            <div style={{'background-color':'orange'}}>不提醒</div>
+          </Tooltip>
+        }>
         <Row>
           {notifykeys.map(function (notifykey) {
             if (notifykey != "newShip") {
+              var notifyvalue = notifylist[notifykey];
+              var color = notifyvalue==1?'blue':'orange';
               return (
                 <Col xs={3} sm={colSm} md={colMd}>
-                  <div className="ship-item btn-default">
-                  <span className="ship-name">
-                    {$ships[notifykey].api_name}
-                  </span>
+                  <div className="ship-item btn-default" style={{'background-color':color}}>
+                    <span className="ship-name" onClick={() => {this.changeNotify(notifykey)}}>
+                      {$ships[notifykey].api_name}
+                    </span>
                     <span onClick={() => {this.removenotify(notifykey)}} className="close-btn"> </span>
                   </div>
                 </Col>
@@ -395,6 +415,7 @@ export const reactClass = connect(
             }
           }.bind(this))}
         </Row>
+        </OverlayTrigger>
       </div>
     )
   }
