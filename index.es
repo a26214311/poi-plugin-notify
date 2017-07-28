@@ -27,10 +27,9 @@ export const reactClass = connect(
   constructor(props) {
     super(props)
     this.state = {
-      need_notify: "",
       notify_list: {newShip: true},
-      newestshipid: 0,
       need_load: true,
+      notifyed:{},
       ship_targets: this.simplfyship(),
       show_shipList: false,
       input_shipList: ''
@@ -38,50 +37,7 @@ export const reactClass = connect(
   }
 
   componentWillReceiveProps(nextProps) {
-    let oldnewestshipid = this.state.newestshipid;
-    if (oldnewestshipid == 0) {
-      let newestshipid = this.get_newest_shipid(nextProps);
-      this.setState({newestshipid: newestshipid});
-    } else {
-      this.get_newest_ship(nextProps)
-    }
-  }
 
-  get_newest_ship(nextProps) {
-    try {
-      this.get_newest_ship_D(nextProps);
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  get_newest_shipid(nextProps) {
-    try {
-      let ships = nextProps.ships;
-      let newestid = 0;
-      for (let p in ships) {
-        if (parseInt(p) > newestid) {
-          newestid = p;
-        }
-      }
-      return newestid;
-    } catch (e) {
-      console.log(e);
-      return -1;
-    }
-  }
-
-  get_newest_ship_D(nextProps) {
-    let newestid = this.get_newest_shipid(nextProps);
-    let oldnewestshipid = this.state.newestshipid;
-    let ships = nextProps.ships;
-    if (newestid > oldnewestshipid) {
-      let newestship = ships[newestid];
-      let newestapiid = newestship.api_ship_id;
-      let $ships = this.props.$ships;
-      let newestname = $ships[newestapiid].api_name;
-      this.need_notify(newestapiid, newestname, newestid);
-    }
   }
 
 
@@ -97,22 +53,53 @@ export const reactClass = connect(
   handleResponse = e => {
     const {path, body} = e.detail;
     if (path == "/kcsapi/api_port/port") {
-      let neednotify = this.state.need_notify;
-      if (neednotify != "") {
-        window.toggleModal('锁船提醒', neednotify + ':快给老娘上锁！');
-        window.toast(neednotify + ':快给老娘上锁！');
-        this.setState({need_notify: ""});
-      }
+      this.get_all_unlocked_ship();
     }
   };
 
-  if_new_ship(newshipid) {
+  get_all_unlocked_ship(){
+    let allships = this.props.ships;
+    let $ships = this.props.$ships;
+    let notifylist = this.state.notify_list;
+    let notifyed = this.state.notifyed;
+    var notifys = [];
+    for(var p in allships){
+      var willnotify=false;
+      var locked = allships[p].api_locked;
+      var newshipid = allships[p].api_ship_id;
+      var shipid = allships[p].api_id;
+      if(locked==0){
+        if(!notifyed[shipid]){
+          if (notifylist.newShip) {
+            if (this.if_new_ship(shipid,newshipid)) {
+              willnotify=true;
+            }
+          }
+          if (notifylist[newshipid]) {
+            willnotify=true;
+          }
+        }
+      }
+      if(willnotify){
+        var shipname = $ships[newshipid].api_name;
+        notifyed[shipid]=1;
+        notifys.push(shipname);
+      }
+    }
+    if(notifys.length>0){
+      var notifystr = notifys.join('&');
+      window.toggleModal('锁船提醒', notifystr + ':快给老娘上锁！');
+      window.toast(notifystr + ':快给老娘上锁！');
+      this.setState({notifyed:notifyed});
+    }
+  }
+
+  if_new_ship(shipid,newshipid) {
     let allships = this.props.ships;
     let $ships = this.props.$ships;
     let shipidlist = {};
     let x = newshipid;
     shipidlist[x] = 1;
-    let c = 0;
     while ($ships[x].api_aftershipid != "0") {
       let aftershipid = $ships[x].api_aftershipid;
       if (shipidlist[aftershipid] == undefined) {
@@ -124,37 +111,15 @@ export const reactClass = connect(
     }
     for (let p in allships) {
       let ship = allships[p];
-      let shipid = ship.api_ship_id;
-      if (shipidlist[shipid]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  need_notify(newshipid, newshipname, newestid) {
-    let newstate = {};
-    let notifylist = this.state.notify_list;
-    if (notifylist.newShip) {
-      if (this.if_new_ship(newshipid)) {
-        let neednotify = this.state.need_notify;
-        if (neednotify == "") {
-          newstate.need_notify = newshipname;
-        } else {
-          newstate.need_notify = neednotify + "&" + newshipname;
+      let id = ship.api_id;
+      if(id!=shipid){
+        let shipid = ship.api_ship_id;
+        if (shipidlist[shipid]) {
+          return false;
         }
       }
     }
-    if (notifylist[newshipid]) {
-      let neednotify = this.state.need_notify;
-      if (neednotify == "") {
-        newstate.need_notify = newshipname;
-      } else {
-        newstate.need_notify = neednotify + "&" + newshipname;
-      }
-    }
-    newstate.newestshipid = newestid;
-    this.setState(newstate);
+    return true;
   }
 
   handleFormChange(e) {
