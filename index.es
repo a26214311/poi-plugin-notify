@@ -391,31 +391,33 @@ export const reactClass = connect(
             </Button>
           </Col>
         </Row>
-        <OverlayTrigger placement={'bottom'} overlay={
-          <Tooltip>
-            <div style={{'background-color':'blue'}}>提醒</div>
-            <div style={{'background-color':'orange'}}>不提醒</div>
-          </Tooltip>
-        }>
         <Row>
           {notifykeys.map(function (notifykey) {
             if (notifykey != "newShip") {
               var notifyvalue = notifylist[notifykey];
-              var color = notifyvalue==1?'blue':'orange';
+              var color = 'ship-item btn-' + (notifyvalue == 1 ? 'success' : 'default');
               return (
-                <Col xs={3} sm={colSm} md={colMd}>
-                  <div className="ship-item btn-default" style={{'background-color':color}}>
-                    <span className="ship-name" onClick={() => {this.changeNotify(notifykey)}}>
-                      {$ships[notifykey].api_name}
-                    </span>
-                    <span onClick={() => {this.removenotify(notifykey)}} className="close-btn"> </span>
-                  </div>
-                </Col>
+
+                <OverlayTrigger placement={'top'} overlay={
+                  <Tooltip>
+                    <Button bsStyle="success" bsSize="xsmall" block><FontAwesome name="check" style={{marginRight: '10px'}}/>提醒此船</Button>
+                    <Button bsStyle="default" bsSize="xsmall" block><FontAwesome name="close" style={{marginRight: '10px'}}/>不提醒此船</Button>
+                    <small>点击可切换状态</small>
+                  </Tooltip>
+                }>
+                  <Col xs={3} sm={colSm} md={colMd}>
+                    <div className={color}>
+                      <span className="ship-name" onClick={() => {this.changeNotify(notifykey)}}>
+                         {notifyvalue == 1 ? <FontAwesome name="check" style={{marginRight: '10px'}}/> : <FontAwesome name="close" style={{marginRight: '10px'}}/>}{$ships[notifykey].api_name}
+                      </span>
+                      <span onClick={() => {this.removenotify(notifykey)}} className="close-btn"> </span>
+                    </div>
+                  </Col>
+                </OverlayTrigger>
               )
             }
           }.bind(this))}
         </Row>
-        </OverlayTrigger>
       </div>
     )
   }
