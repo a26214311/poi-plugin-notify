@@ -328,8 +328,8 @@ export const reactClass = connect(
 
   render_D() {
     const {$ships, horizontal} = this.props;
-    const colSm = (horizontal == 'horizontal') ? 3 : 2,
-      colMd = (horizontal == 'horizontal') ? 3 : 1;
+    const colSm = (horizontal == 'horizontal') ? 4 : 3,
+      colMd = (horizontal == 'horizontal') ? 4 : 2;
     const notifylist = this.state.notify_list;
     const notifykeys = Object.keys(notifylist);
     try {
