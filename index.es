@@ -400,15 +400,15 @@ export const reactClass = connect(
 
                 <OverlayTrigger placement={'top'} overlay={
                   <Tooltip>
-                    <Button bsStyle="success" bsSize="xsmall" block><FontAwesome name="check" style={{marginRight: '10px'}}/>提醒此船</Button>
-                    <Button bsStyle="default" bsSize="xsmall" block><FontAwesome name="close" style={{marginRight: '10px'}}/>不提醒此船</Button>
+                    <Button bsStyle="success" bsSize="xsmall" block><FontAwesome name="eye" style={{marginRight: '10px'}}/>提醒此船</Button>
+                    <Button bsStyle="default" bsSize="xsmall" block><FontAwesome name="eye-slash" style={{marginRight: '10px'}}/>不提醒此船</Button>
                     <small>点击可切换状态</small>
                   </Tooltip>
                 }>
                   <Col xs={4} sm={colSm} md={colMd}>
                     <div className={color}>
                       <span className="ship-name" onClick={() => {this.changeNotify(notifykey)}}>
-                         {notifyvalue == 1 ? <FontAwesome name="check" style={{marginRight: '10px'}}/> : <FontAwesome name="close" style={{marginRight: '10px'}}/>}{$ships[notifykey].api_name}
+                         {notifyvalue == 1 ? <FontAwesome name="eye" style={{marginRight: '10px'}}/> : <FontAwesome name="eye-slash" style={{marginRight: '10px'}}/>}{$ships[notifykey].api_name}
                       </span>
                       <span onClick={() => {this.removenotify(notifykey)}} className="close-btn"> </span>
                     </div>
