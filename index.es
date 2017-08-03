@@ -405,7 +405,7 @@ export const reactClass = connect(
                     <small>点击可切换状态</small>
                   </Tooltip>
                 }>
-                  <Col xs={3} sm={colSm} md={colMd}>
+                  <Col xs={4} sm={colSm} md={colMd}>
                     <div className={color}>
                       <span className="ship-name" onClick={() => {this.changeNotify(notifykey)}}>
                          {notifyvalue == 1 ? <FontAwesome name="check" style={{marginRight: '10px'}}/> : <FontAwesome name="close" style={{marginRight: '10px'}}/>}{$ships[notifykey].api_name}
