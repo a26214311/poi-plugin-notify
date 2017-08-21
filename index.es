@@ -196,7 +196,6 @@ export const reactClass = connect(
         return [];
       }
     }
-
   }
 
   simplfyship_D() {
@@ -313,6 +312,53 @@ export const reactClass = connect(
     this.setState({notify_list: nl},()=>this.savelist());
   }
 
+  getFutureShips(){
+    var ships = this.props.ships;
+    var $ships = this.props.$ships;
+    for (let p in $ships) {
+      let ship = $ships[p];
+      let afterlv = ship.api_afterlv;
+      let aftershipid = ship.api_aftershipid;
+      if (afterlv && aftershipid) {
+        let aftership = $ships[aftershipid];
+        let aftership_beforeshipid = aftership.before_shipid;
+        let aftership_beforeshiplv = aftership.before_shiplv;
+        if (aftership_beforeshipid) {
+          if (afterlv < aftership_beforeshiplv) {
+            aftership.before_shipid = p;
+            aftership.before_shiplv = afterlv;
+          }
+        } else {
+          aftership.before_shipid = p;
+          aftership.before_shiplv = afterlv;
+        }
+      }
+    }
+    let list = [];
+    for (let p in $ships) {
+      let ship = $ships[p];
+      let afterlv = ship.api_afterlv;
+      let aftershipid = ship.api_aftershipid;
+      if (afterlv && aftershipid) {
+        if (ship.before_shipid == undefined) {
+          list[p]=1;
+        }
+      }
+    }
+    for(var p in ships){
+      var id = ships[p].api_ship_id;
+      let ship = $ships[id];
+      var initid = -1;
+      while (ship.before_shipid != undefined) {
+        ship = $ships[ship.before_shipid];
+      }
+      initid = ship.api_id;
+      delete(list[initid]);
+    }
+    return list;
+  }
+
+
   render() {
     try {
       return this.render_D();
@@ -364,7 +410,9 @@ export const reactClass = connect(
       });
       return out;
     };
-
+    let futurelist = Object.keys(this.getFutureShips());
+    console.log("future");
+    console.log(futurelist);
     return (
       <div id="notify" className="notify">
         <link rel="stylesheet" href={join(__dirname, 'notify.css')}/>
@@ -397,7 +445,6 @@ export const reactClass = connect(
               var notifyvalue = notifylist[notifykey];
               var color = 'ship-item btn-' + (notifyvalue == 1 ? 'success' : 'default');
               return (
-
                 <OverlayTrigger placement={'top'} overlay={
                   <Tooltip>
                     <Button bsStyle="success" bsSize="xsmall" block><FontAwesome name="check-square-o" style={{marginRight: '5px'}}/>提醒此船</Button>
@@ -417,6 +464,16 @@ export const reactClass = connect(
               )
             }
           }.bind(this))}
+        </Row>
+        <Row>
+          {
+            futurelist.map(function(shipid){
+              console.log(shipid);
+              return(
+                <div>{$ships[shipid].api_name}</div>
+              )
+            })
+          }
         </Row>
       </div>
     )
