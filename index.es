@@ -131,7 +131,6 @@ export const reactClass = connect(
   }
 
   addNotifyShip(value) {
-    console.log(value);
     let notify_list = this.state.notify_list;
     if (notify_list[value] == undefined) {
       notify_list[value] = 1;
