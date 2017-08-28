@@ -32,6 +32,7 @@ export const reactClass = connect(
       notifyed:{},
       ship_targets: this.simplfyship(),
       show_shipList: false,
+      show_new_ships:true,
       input_shipList: ''
     }
   }
@@ -126,6 +127,11 @@ export const reactClass = connect(
 
   handleFormChange(e) {
     let value = e.currentTarget.value;
+    this.addNotifyShip(value);
+  }
+
+  addNotifyShip(value) {
+    console.log(value);
     let notify_list = this.state.notify_list;
     if (notify_list[value] == undefined) {
       notify_list[value] = 1;
@@ -358,6 +364,11 @@ export const reactClass = connect(
     return list;
   }
 
+  hideShip(){
+    var old = this.state.show_new_ships;
+    this.setState({show_new_ships:!old});
+  }
+
 
   render() {
     try {
@@ -410,67 +421,79 @@ export const reactClass = connect(
       });
       return out;
     };
-    let futurelist = Object.keys(this.getFutureShips());
-    console.log("future");
-    console.log(futurelist);
+    let futurelist = this.state.show_new_ships?Object.keys(this.getFutureShips()):[];
     return (
       <div id="notify" className="notify">
         <link rel="stylesheet" href={join(__dirname, 'notify.css')}/>
+        <div style={{'min-height':'300px'}}>
+          <Row>
+            <Col xs={12}>
+              <form className="input-select">
+                <FormGroup>
+                  <FormControl type="text" placeholder="输入要提醒的舰船" ref="shipInput" value={this.state.input_shipList}
+                               onChange={this.changeHandler} onFocus={this.showShipList}
+                               onBlur={this.hiddenShipList}/>
+                </FormGroup>
+                <ul className="ship-list dropdown-menu" style={{display: this.state.show_shipList ? 'block' : 'none'}}>
+                  {createList(this.state.ship_targets)}
+                </ul>
+              </form>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={12}>
+              <Button bsSize="small" onClick={this.handleNewShip}
+                      bsStyle={this.state.notify_list.newShip ? "success" : "danger"} style={{width: '100%'}}>
+                <FontAwesome name={this.state.notify_list.newShip ? 'heart' : 'heartbeat'}/>
+                &nbsp;船舱里没有的新船
+              </Button>
+            </Col>
+          </Row>
+          <Row>
+            {notifykeys.map(function (notifykey) {
+              if (notifykey != "newShip") {
+                var notifyvalue = notifylist[notifykey];
+                var color = 'ship-item btn-' + (notifyvalue == 1 ? 'success' : 'default');
+                return (
+                  <OverlayTrigger placement={'top'} overlay={
+                    <Tooltip>
+                      <Button bsStyle="success" bsSize="xsmall" block><FontAwesome name="check-square-o" style={{marginRight: '5px'}}/>提醒此船</Button>
+                      <Button bsStyle="default" bsSize="xsmall" block><FontAwesome name="square-o" style={{marginRight: '5px'}}/>不提醒此船</Button>
+                      <small>点击可切换状态</small>
+                    </Tooltip>
+                  }>
+                    <Col xs={4} sm={colSm} md={colMd}>
+                      <div className={color}>
+                        <span className="ship-name" onClick={() => {this.changeNotify(notifykey)}}>
+                           {notifyvalue == 1 ? <FontAwesome name="check-square-o" style={{marginRight: '5px'}}/> : <FontAwesome name="square-o" style={{marginRight: '5px'}}/>}{$ships[notifykey].api_name}
+                        </span>
+                        <span onClick={() => {this.removenotify(notifykey)}} className="close-btn"> </span>
+                      </div>
+                    </Col>
+                  </OverlayTrigger>
+                )
+              }
+            }.bind(this))}
+          </Row>
+        </div>
         <Row>
           <Col xs={12}>
-            <form className="input-select">
-              <FormGroup>
-                <FormControl type="text" placeholder="输入要提醒的舰船" ref="shipInput" value={this.state.input_shipList}
-                             onChange={this.changeHandler} onFocus={this.showShipList}
-                             onBlur={this.hiddenShipList}/>
-              </FormGroup>
-              <ul className="ship-list dropdown-menu" style={{display: this.state.show_shipList ? 'block' : 'none'}}>
-                {createList(this.state.ship_targets)}
-              </ul>
-            </form>
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={12}>
-            <Button bsSize="small" onClick={this.handleNewShip}
-                    bsStyle={this.state.notify_list.newShip ? "success" : "danger"} style={{width: '100%'}}>
-              <FontAwesome name={this.state.notify_list.newShip ? 'heart' : 'heartbeat'}/>
-              &nbsp;船舱里没有的新船
+            <Button bsSize="small" onClick={() => this.hideShip()}
+                    style={{width: '100%'}}>
+              <FontAwesome name={this.state.show_new_ships? 'sort-up' : 'sort-down'}/>
             </Button>
           </Col>
         </Row>
         <Row>
-          {notifykeys.map(function (notifykey) {
-            if (notifykey != "newShip") {
-              var notifyvalue = notifylist[notifykey];
-              var color = 'ship-item btn-' + (notifyvalue == 1 ? 'success' : 'default');
-              return (
-                <OverlayTrigger placement={'top'} overlay={
-                  <Tooltip>
-                    <Button bsStyle="success" bsSize="xsmall" block><FontAwesome name="check-square-o" style={{marginRight: '5px'}}/>提醒此船</Button>
-                    <Button bsStyle="default" bsSize="xsmall" block><FontAwesome name="square-o" style={{marginRight: '5px'}}/>不提醒此船</Button>
-                    <small>点击可切换状态</small>
-                  </Tooltip>
-                }>
-                  <Col xs={4} sm={colSm} md={colMd}>
-                    <div className={color}>
-                      <span className="ship-name" onClick={() => {this.changeNotify(notifykey)}}>
-                         {notifyvalue == 1 ? <FontAwesome name="check-square-o" style={{marginRight: '5px'}}/> : <FontAwesome name="square-o" style={{marginRight: '5px'}}/>}{$ships[notifykey].api_name}
-                      </span>
-                      <span onClick={() => {this.removenotify(notifykey)}} className="close-btn"> </span>
-                    </div>
-                  </Col>
-                </OverlayTrigger>
-              )
-            }
-          }.bind(this))}
-        </Row>
-        <Row>
           {
-            futurelist.map(function(shipid){
-              console.log(shipid);
+            futurelist.map((shipid) => {
               return(
-                <div>{$ships[shipid].api_name}</div>
+                <Col xs={4} sm={colSm} md={colMd}>
+                  <div className="ship-item">
+                    <span className="ship-name" onClick={() => {this.addNotifyShip(shipid)}}>{$ships[shipid].api_name}
+                    </span>
+                  </div>
+                </Col>
               )
             })
           }
